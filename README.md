@@ -1,5 +1,5 @@
 # gffread
-Small, distroless-when-possible container for `gffread`.
+Small compatibility-focused container for `gffread`.
 
 ## how to use
 ```bash

@@ -1,4 +1,4 @@
-name: Build and Publish Distroless gffread
+name: Build and Publish gffread
 
 on:
   push:
