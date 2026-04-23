@@ -1,34 +1,30 @@
 # syntax=docker/dockerfile:1
-# Compatibility-first template for gffread.
-# Installs package from Bioconda and copies the full conda runtime to avoid missing libs/interpreters.
 
-FROM mambaorg/micromamba:2.0.5-debian12-slim AS builder
+FROM debian:bookworm-slim AS builder
 
-RUN micromamba install -y -n base -c conda-forge -c bioconda \
-    gffread \
-    && micromamba clean --all --yes
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    git \
+    g++ \
+    make \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Resolve a runnable command for this package.
-# Prefer exact match, then underscore variant, then prefix match.
-RUN set -eux; \
-    BIN=""; \
-    if [ -x "/opt/conda/bin/gffread" ]; then BIN="/opt/conda/bin/gffread"; fi; \
-    if [ -z "$BIN" ]; then CAND="/opt/conda/bin/$(echo gffread | tr '-' '_')"; [ -x "$CAND" ] && BIN="$CAND" || true; fi; \
-    if [ -z "$BIN" ]; then BIN="$(find /opt/conda/bin -maxdepth 1 -type f -perm -111 -name 'gffread*' | head -n1 || true)"; fi; \
-    test -n "$BIN"; \
-    printf '%s\n' "$BIN" > /tmp/tool-entry-path
+WORKDIR /build
+RUN git clone --depth 1 https://github.com/gpertea/gffread.git gffread
+WORKDIR /build/gffread
+RUN make release
 
-FROM mambaorg/micromamba:2.0.5-debian12-slim
+FROM debian:bookworm-slim
 
-COPY --from=builder /opt/conda /opt/conda
-COPY --from=builder /tmp/tool-entry-path /tmp/tool-entry-path
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    zlib1g \
+    && rm -rf /var/lib/apt/lists/*
 
-USER root
-ENV PATH="/opt/conda/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/opt/conda/lib:/opt/conda/lib64"
-RUN set -eux; \
-    BIN="$(cat /tmp/tool-entry-path)"; \
-    printf '#!/usr/bin/env bash\nexec "%s" "$@"\n' "$BIN" > /usr/local/bin/gffread
-RUN chmod +x /usr/local/bin/gffread && rm -f /tmp/tool-entry-path
+COPY --from=builder /build/gffread/gffread /usr/local/bin/gffread
+
 WORKDIR /data
-ENTRYPOINT ["/usr/local/bin/gffread"]
+CMD ["gffread", "--help"]
