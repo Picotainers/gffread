@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /build
 RUN git clone --depth 1 https://github.com/gpertea/gffread.git gffread
 WORKDIR /build/gffread
+RUN git clone --depth 1 https://github.com/gpertea/gclib.git ../gclib
 RUN make release
 
 FROM debian:bookworm-slim
