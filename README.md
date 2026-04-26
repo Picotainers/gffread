@@ -5,24 +5,24 @@ Source-built container for `gffread`, a utility for parsing, filtering, converti
 ## Quick Usage
 
 ```bash
-docker run --rm docker.io/picotainers/gffread gffread --help
+docker run --rm docker.io/picotainers/gffread:latest gffread --help
 ```
 
 ## Usage
 
 ```bash
 # Show help
-docker run --rm docker.io/picotainers/gffread gffread --help
+docker run --rm docker.io/picotainers/gffread:latest gffread --help
 
 # Run with local files mounted into /data
-docker run --rm -v "$(pwd):/data" docker.io/picotainers/gffread \
+docker run --rm -v "$(pwd):/data" docker.io/picotainers/gffread:latest \
   gffread /data/input.gtf -T -o /data/output.gff3
 ```
 
 ## Building
 
 ```bash
-docker build -t picotainers/gffread .
+docker build -t docker.io/picotainers/gffread:latest .
 ```
 
 ## Primary Use Case
