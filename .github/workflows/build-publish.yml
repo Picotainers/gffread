@@ -22,9 +22,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p testdata
-          cat > testdata/input.gtf <<'EOF'
-          chr1	source	exon	1	10	.	+	.	gene_id "g1"; transcript_id "t1";
-          EOF
+          printf 'chr1\tsource\ttranscript\t1\t10\t.\t+\t.\tgene_id "g1"; transcript_id "t1";\n' > testdata/input.gtf
+          printf 'chr1\tsource\texon\t1\t10\t.\t+\t.\tgene_id "g1"; transcript_id "t1";\n' >> testdata/input.gtf
 
           docker run --rm picotainers-local/gffread:smoke gffread --help > testdata/help.txt
           grep -qi 'gffread' testdata/help.txt
